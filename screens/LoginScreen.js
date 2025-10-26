@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from "react-native";
 import { ref, get, child } from "firebase/database";
-import { db } from "../firebase"; // caminho corrigido
+import { db } from "./firebase"; // caminho corrigido
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState("");

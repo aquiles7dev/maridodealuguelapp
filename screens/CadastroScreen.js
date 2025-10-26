@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { ref, push } from 'firebase/database';
-import { db } from '../firebase'; // ajuste o caminho se necessário
+import { db } from './firebase'; // ajuste o caminho se necessário
 
 export default function CadastroScreen({ navigation }) {
   const [nome, setNome] = useState('');

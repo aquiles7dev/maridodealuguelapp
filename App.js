@@ -11,7 +11,7 @@ import PrestadorScreen from "./screens/PrestadorScreen";
 import AdminScreen from "./screens/AdminScreen";
 
 // Firebase
-import "./firebase"; // Já inicializa o Firebase
+import "./screens/firebase";
 
 const Stack = createNativeStackNavigator();
 
