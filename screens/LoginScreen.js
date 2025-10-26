@@ -1,128 +1,89 @@
-import React, { useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  Image,
-} from "react-native";
+import React, { useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 
 export default function LoginScreen({ navigation }) {
-  const [email, setEmail] = useState("");
-  const [senha, setSenha] = useState("");
+  const [email, setEmail] = useState('');
+  const [senha, setSenha] = useState('');
 
   const handleLogin = () => {
-    console.log("Tentando login com:", email, senha);
-    navigation.navigate("Cliente"); // simulação de login
-  };
+    if (!email || !senha) {
+      Alert.alert('Erro', 'Por favor, preencha todos os campos!');
+      return;
+    }
 
-  const handleCadastro = () => {
-    console.log("Usuário clicou em cadastrar");
-    navigation.navigate("Cadastro"); // agora leva para a tela Cadastro
+    // Aqui você deve buscar o usuário no backend/Firebase
+    // Exemplo de usuários simulados:
+    const usuariosSimulados = [
+      { email: 'cliente@exemplo.com', senha: '123', tipo: 'Cliente' },
+      { email: 'prestador@exemplo.com', senha: '123', tipo: 'Prestador' },
+      { email: 'adm@exemplo.com', senha: '123', tipo: 'ADM' },
+    ];
+
+    const usuario = usuariosSimulados.find(u => u.email === email && u.senha === senha);
+
+    if (!usuario) {
+      Alert.alert('Erro', 'E-mail ou senha incorretos!');
+      return;
+    }
+
+    // Direciona para a tela correta
+    switch (usuario.tipo) {
+      case 'Cliente':
+        navigation.replace('Cliente');
+        break;
+      case 'Prestador':
+        navigation.replace('Prestador');
+        break;
+      case 'ADM':
+        navigation.replace('ADM');
+        break;
+      default:
+        Alert.alert('Erro', 'Tipo de usuário desconhecido!');
+    }
   };
 
   return (
     <View style={styles.container}>
-      {/* Logo */}
-      <Image
-        source={require("../assets/logo.png")} // coloca sua logo em assets/logo.png
-        style={styles.logo}
-        resizeMode="contain"
-      />
+      <Text style={styles.titulo}>Login</Text>
 
-      <Text style={styles.title}>Marido de Aluguel</Text>
-      <Text style={styles.subtitle}>Prestador de Serviços Domiciliar</Text>
-
-      {/* Inputs */}
       <TextInput
         style={styles.input}
-        placeholder="Digite seu email"
-        placeholderTextColor="#999"
+        placeholder="E-mail"
         value={email}
         onChangeText={setEmail}
+        keyboardType="email-address"
+        autoCapitalize="none"
       />
 
       <TextInput
         style={styles.input}
-        placeholder="Digite sua senha"
-        placeholderTextColor="#999"
+        placeholder="Senha"
         value={senha}
         onChangeText={setSenha}
         secureTextEntry
       />
 
-      {/* Botão de Login */}
-      <TouchableOpacity style={styles.button} onPress={handleLogin}>
-        <Text style={styles.buttonText}>Entrar</Text>
+      <TouchableOpacity style={styles.botaoLogin} onPress={handleLogin}>
+        <Text style={styles.textoBotao}>Entrar</Text>
       </TouchableOpacity>
 
-      {/* Botão de Cadastro */}
-      <TouchableOpacity style={styles.buttonOutline} onPress={handleCadastro}>
-        <Text style={styles.buttonOutlineText}>Criar Conta</Text>
+      <TouchableOpacity
+        onPress={() => navigation.navigate('Cadastro')}
+        style={styles.botaoCadastro}
+      >
+        <Text style={styles.textoBotaoCadastro}>Não tem conta? Cadastre-se</Text>
       </TouchableOpacity>
     </View>
   );
 }
 
+// Estilos (mesmos de antes)
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#FFF0F5", // rosa claro de fundo
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 20,
-  },
-  logo: {
-    width: 150,
-    height: 150,
-    marginBottom: 10,
-  },
-  title: {
-    fontSize: 26,
-    fontWeight: "bold",
-    color: "#FF1493", // rosa forte
-    marginBottom: 5,
-  },
-  subtitle: {
-    fontSize: 14,
-    color: "#FF69B4",
-    marginBottom: 30,
-  },
-  input: {
-    width: "100%",
-    borderWidth: 1,
-    borderColor: "#FF69B4",
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 15,
-    backgroundColor: "#fff",
-    color: "#333",
-  },
-  button: {
-    width: "100%",
-    backgroundColor: "#FF1493",
-    padding: 15,
-    borderRadius: 8,
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  buttonText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
-  },
-  buttonOutline: {
-    width: "100%",
-    borderWidth: 2,
-    borderColor: "#FF1493",
-    padding: 15,
-    borderRadius: 8,
-    alignItems: "center",
-  },
-  buttonOutlineText: {
-    color: "#FF1493",
-    fontWeight: "bold",
-    fontSize: 16,
-  },
+  container: { flex: 1, justifyContent: 'center', paddingHorizontal: 20, backgroundColor: '#fff' },
+  titulo: { fontSize: 28, fontWeight: 'bold', marginBottom: 30, alignSelf: 'center' },
+  input: { height: 50, borderColor: '#ccc', borderWidth: 1, borderRadius: 8, marginBottom: 15, paddingHorizontal: 15, fontSize: 16 },
+  botaoLogin: { backgroundColor: '#ff4d4d', padding: 15, borderRadius: 8, alignItems: 'center', marginBottom: 15 },
+  textoBotao: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
+  botaoCadastro: { alignItems: 'center' },
+  textoBotaoCadastro: { color: '#ff4d4d', fontSize: 14 },
 });

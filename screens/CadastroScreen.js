@@ -1,121 +1,110 @@
-import React, { useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  ScrollView,
-} from "react-native";
+import React, { useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Picker } from 'react-native';
 
 export default function CadastroScreen({ navigation }) {
-  const [nome, setNome] = useState("");
-  const [cpf, setCpf] = useState("");
-  const [celular, setCelular] = useState("");
-  const [endereco, setEndereco] = useState("");
-  const [prestador, setPrestador] = useState(false);
+  const [nome, setNome] = useState('');
+  const [email, setEmail] = useState('');
+  const [senha, setSenha] = useState('');
+  const [confirmarSenha, setConfirmarSenha] = useState('');
+  const [tipo, setTipo] = useState('Cliente'); // Cliente ou Prestador
 
   const handleCadastro = () => {
-    console.log("Novo usuário:", { nome, cpf, celular, endereco, prestador });
-    // Aqui você salvaria no Firebase depois
-    navigation.goBack(); // volta para tela de Login após cadastrar
+    if (!nome || !email || !senha || !confirmarSenha) {
+      Alert.alert('Erro', 'Por favor, preencha todos os campos!');
+      return;
+    }
+
+    if (senha !== confirmarSenha) {
+      Alert.alert('Erro', 'As senhas não coincidem!');
+      return;
+    }
+
+    // Aqui você adiciona a lógica de cadastro no backend/Firebase
+    console.log('Cadastro realizado:', nome, email, senha, tipo);
+    Alert.alert('Sucesso', 'Cadastro realizado com sucesso!');
+
+    // Direciona para a tela correta de acordo com o tipo
+    switch (tipo) {
+      case 'Cliente':
+        navigation.replace('Cliente');
+        break;
+      case 'Prestador':
+        navigation.replace('Prestador');
+        break;
+      default:
+        Alert.alert('Erro', 'Tipo de usuário desconhecido!');
+    }
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Criar Conta</Text>
+    <View style={styles.container}>
+      <Text style={styles.titulo}>Cadastro</Text>
 
       <TextInput
         style={styles.input}
-        placeholder="Nome completo"
+        placeholder="Nome"
         value={nome}
         onChangeText={setNome}
       />
 
       <TextInput
         style={styles.input}
-        placeholder="CPF"
-        value={cpf}
-        onChangeText={setCpf}
+        placeholder="E-mail"
+        value={email}
+        onChangeText={setEmail}
+        keyboardType="email-address"
+        autoCapitalize="none"
       />
 
       <TextInput
         style={styles.input}
-        placeholder="Número de celular"
-        value={celular}
-        onChangeText={setCelular}
+        placeholder="Senha"
+        value={senha}
+        onChangeText={setSenha}
+        secureTextEntry
       />
 
       <TextInput
         style={styles.input}
-        placeholder="Endereço"
-        value={endereco}
-        onChangeText={setEndereco}
+        placeholder="Confirmar Senha"
+        value={confirmarSenha}
+        onChangeText={setConfirmarSenha}
+        secureTextEntry
       />
 
-      {/* Botão Criar Conta */}
-      <TouchableOpacity style={styles.button} onPress={handleCadastro}>
-        <Text style={styles.buttonText}>Cadastrar</Text>
-      </TouchableOpacity>
-
-      {/* Voltar */}
-      <TouchableOpacity
-        style={styles.buttonOutline}
-        onPress={() => navigation.goBack()}
+      <Text style={styles.label}>Tipo de Usuário</Text>
+      <Picker
+        selectedValue={tipo}
+        style={styles.picker}
+        onValueChange={(itemValue) => setTipo(itemValue)}
       >
-        <Text style={styles.buttonOutlineText}>Voltar</Text>
+        <Picker.Item label="Cliente" value="Cliente" />
+        <Picker.Item label="Prestador" value="Prestador" />
+      </Picker>
+
+      <TouchableOpacity style={styles.botaoCadastro} onPress={handleCadastro}>
+        <Text style={styles.textoBotao}>Cadastrar</Text>
       </TouchableOpacity>
-    </ScrollView>
+
+      <TouchableOpacity
+        onPress={() => navigation.navigate('Login')}
+        style={styles.botaoLogin}
+      >
+        <Text style={styles.textoBotaoLogin}>Já tem conta? Entrar</Text>
+      </TouchableOpacity>
+    </View>
   );
 }
 
+// Estilos
 const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
-    backgroundColor: "#FFF0F5",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 20,
-  },
-  title: {
-    fontSize: 26,
-    fontWeight: "bold",
-    color: "#FF1493",
-    marginBottom: 20,
-  },
-  input: {
-    width: "100%",
-    borderWidth: 1,
-    borderColor: "#FF69B4",
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 15,
-    backgroundColor: "#fff",
-  },
-  button: {
-    width: "100%",
-    backgroundColor: "#FF1493",
-    padding: 15,
-    borderRadius: 8,
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  buttonText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
-  },
-  buttonOutline: {
-    width: "100%",
-    borderWidth: 2,
-    borderColor: "#FF1493",
-    padding: 15,
-    borderRadius: 8,
-    alignItems: "center",
-  },
-  buttonOutlineText: {
-    color: "#FF1493",
-    fontWeight: "bold",
-    fontSize: 16,
-  },
+  container: { flex: 1, justifyContent: 'center', paddingHorizontal: 20, backgroundColor: '#fff' },
+  titulo: { fontSize: 28, fontWeight: 'bold', marginBottom: 30, alignSelf: 'center' },
+  input: { height: 50, borderColor: '#ccc', borderWidth: 1, borderRadius: 8, marginBottom: 15, paddingHorizontal: 15, fontSize: 16 },
+  label: { fontSize: 16, marginBottom: 5, fontWeight: 'bold' },
+  picker: { height: 50, marginBottom: 15 },
+  botaoCadastro: { backgroundColor: '#ff4d4d', padding: 15, borderRadius: 8, alignItems: 'center', marginBottom: 15 },
+  textoBotao: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
+  botaoLogin: { alignItems: 'center' },
+  textoBotaoLogin: { color: '#ff4d4d', fontSize: 14 },
 });
