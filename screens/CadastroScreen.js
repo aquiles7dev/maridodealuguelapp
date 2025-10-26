@@ -1,48 +1,54 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Picker } from 'react-native';
+// Importa as bibliotecas do React e Firebase
+import React, { useState } from "react";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from "react-native";
+
+// Importa as funções do Firebase
+import { ref, set } from "firebase/database";
+import { db } from "./firebase"; // 🔥 importa o arquivo firebase.js
 
 export default function CadastroScreen({ navigation }) {
-  const [nome, setNome] = useState('');
-  const [email, setEmail] = useState('');
-  const [senha, setSenha] = useState('');
-  const [confirmarSenha, setConfirmarSenha] = useState('');
-  const [tipo, setTipo] = useState('Cliente'); // Cliente ou Prestador
+  // Estados para armazenar os dados do formulário
+  const [nome, setNome] = useState("");
+  const [email, setEmail] = useState("");
+  const [senha, setSenha] = useState("");
+  const [tipo, setTipo] = useState("cliente"); // Pode ser cliente, prestador ou adm
 
+  // Função que será chamada quando clicar em "Cadastrar"
   const handleCadastro = () => {
-    if (!nome || !email || !senha || !confirmarSenha) {
-      Alert.alert('Erro', 'Por favor, preencha todos os campos!');
+    // Verifica se todos os campos estão preenchidos
+    if (!nome || !email || !senha) {
+      Alert.alert("Atenção", "Preencha todos os campos!");
       return;
     }
 
-    if (senha !== confirmarSenha) {
-      Alert.alert('Erro', 'As senhas não coincidem!');
-      return;
-    }
+    // Cria o objeto do novo usuário
+    const novoUsuario = {
+      nome,
+      email,
+      senha,
+      tipo,
+    };
 
-    // Aqui você adiciona a lógica de cadastro no backend/Firebase
-    console.log('Cadastro realizado:', nome, email, senha, tipo);
-    Alert.alert('Sucesso', 'Cadastro realizado com sucesso!');
+    // Cria uma referência no banco de dados com base no email (sem pontos)
+    const emailKey = email.replace(/\./g, "_"); // Firebase não aceita "." em chaves
 
-    // Direciona para a tela correta de acordo com o tipo
-    switch (tipo) {
-      case 'Cliente':
-        navigation.replace('Cliente');
-        break;
-      case 'Prestador':
-        navigation.replace('Prestador');
-        break;
-      default:
-        Alert.alert('Erro', 'Tipo de usuário desconhecido!');
-    }
+    set(ref(db, "usuarios/" + emailKey), novoUsuario)
+      .then(() => {
+        Alert.alert("Sucesso", "Usuário cadastrado com sucesso!");
+        navigation.navigate("Login"); // Volta pra tela de login
+      })
+      .catch((error) => {
+        Alert.alert("Erro", "Erro ao cadastrar: " + error.message);
+      });
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.titulo}>Cadastro</Text>
+      <Text style={styles.titulo}>Crie sua conta</Text>
 
       <TextInput
         style={styles.input}
-        placeholder="Nome"
+        placeholder="Nome completo"
         value={nome}
         onChangeText={setNome}
       />
@@ -50,61 +56,75 @@ export default function CadastroScreen({ navigation }) {
       <TextInput
         style={styles.input}
         placeholder="E-mail"
+        keyboardType="email-address"
         value={email}
         onChangeText={setEmail}
-        keyboardType="email-address"
-        autoCapitalize="none"
       />
 
       <TextInput
         style={styles.input}
         placeholder="Senha"
+        secureTextEntry
         value={senha}
         onChangeText={setSenha}
-        secureTextEntry
       />
 
       <TextInput
         style={styles.input}
-        placeholder="Confirmar Senha"
-        value={confirmarSenha}
-        onChangeText={setConfirmarSenha}
-        secureTextEntry
+        placeholder="Tipo (cliente, prestador, adm)"
+        value={tipo}
+        onChangeText={setTipo}
       />
 
-      <Text style={styles.label}>Tipo de Usuário</Text>
-      <Picker
-        selectedValue={tipo}
-        style={styles.picker}
-        onValueChange={(itemValue) => setTipo(itemValue)}
-      >
-        <Picker.Item label="Cliente" value="Cliente" />
-        <Picker.Item label="Prestador" value="Prestador" />
-      </Picker>
-
-      <TouchableOpacity style={styles.botaoCadastro} onPress={handleCadastro}>
+      <TouchableOpacity style={styles.botao} onPress={handleCadastro}>
         <Text style={styles.textoBotao}>Cadastrar</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity
-        onPress={() => navigation.navigate('Login')}
-        style={styles.botaoLogin}
-      >
-        <Text style={styles.textoBotaoLogin}>Já tem conta? Entrar</Text>
+      <TouchableOpacity onPress={() => navigation.navigate("Login")}>
+        <Text style={styles.link}>Já tem uma conta? Entrar</Text>
       </TouchableOpacity>
     </View>
   );
 }
 
-// Estilos
+// 🎨 Estilos visuais da tela
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', paddingHorizontal: 20, backgroundColor: '#fff' },
-  titulo: { fontSize: 28, fontWeight: 'bold', marginBottom: 30, alignSelf: 'center' },
-  input: { height: 50, borderColor: '#ccc', borderWidth: 1, borderRadius: 8, marginBottom: 15, paddingHorizontal: 15, fontSize: 16 },
-  label: { fontSize: 16, marginBottom: 5, fontWeight: 'bold' },
-  picker: { height: 50, marginBottom: 15 },
-  botaoCadastro: { backgroundColor: '#ff4d4d', padding: 15, borderRadius: 8, alignItems: 'center', marginBottom: 15 },
-  textoBotao: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
-  botaoLogin: { alignItems: 'center' },
-  textoBotaoLogin: { color: '#ff4d4d', fontSize: 14 },
+  container: {
+    flex: 1,
+    backgroundColor: "#121212",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 20,
+  },
+  titulo: {
+    color: "#fff",
+    fontSize: 22,
+    marginBottom: 20,
+    fontWeight: "bold",
+  },
+  input: {
+    backgroundColor: "#1e1e1e",
+    color: "#fff",
+    width: "100%",
+    padding: 10,
+    borderRadius: 8,
+    marginBottom: 15,
+  },
+  botao: {
+    backgroundColor: "#ff4b4b",
+    width: "100%",
+    padding: 12,
+    borderRadius: 8,
+    alignItems: "center",
+    marginTop: 10,
+  },
+  textoBotao: {
+    color: "#fff",
+    fontWeight: "bold",
+  },
+  link: {
+    color: "#bbb",
+    marginTop: 15,
+    textDecorationLine: "underline",
+  },
 });
