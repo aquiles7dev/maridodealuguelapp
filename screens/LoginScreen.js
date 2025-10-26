@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from "react-native";
-import { ref, get } from "firebase/database";
-import { db } from "./firebase"; // importa o banco
+import { ref, get, child } from "firebase/database";
+import { db } from "../firebase"; // caminho corrigido
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState("");
@@ -9,41 +9,55 @@ export default function LoginScreen({ navigation }) {
 
   const handleLogin = () => {
     if (!email || !senha) {
-      Alert.alert("Atenção", "Preencha todos os campos!");
+      Alert.alert("Erro", "Por favor, preencha todos os campos!");
       return;
     }
 
-    const emailKey = email.replace(/\./g, "_"); // Firebase não aceita ponto no nome da chave
-    const userRef = ref(db, "usuarios/" + emailKey);
+    const usuariosRef = ref(db, "usuarios/");
+    get(child(usuariosRef, "")).then((snapshot) => {
+      if (snapshot.exists()) {
+        const usuarios = snapshot.val();
+        let logado = false;
 
-    get(userRef)
-      .then((snapshot) => {
-        if (snapshot.exists()) {
-          const userData = snapshot.val();
+        // Percorre todos os usuários para encontrar correspondência
+        Object.keys(usuarios).forEach((key) => {
+          const usuario = usuarios[key];
+          if (usuario.email === email && usuario.senha === senha) {
+            logado = true;
 
-          if (userData.senha === senha) {
-            Alert.alert("Bem-vindo!", `Login realizado como ${userData.tipo}`);
-
-            // Direciona com base no tipo de usuário
-            if (userData.tipo === "cliente") {
-              navigation.navigate("Cliente");
-            } else if (userData.tipo === "prestador") {
-              navigation.navigate("Prestador");
-            } else if (userData.tipo === "adm") {
-              navigation.navigate("Adm");
-            } else {
-              Alert.alert("Erro", "Tipo de usuário inválido!");
+            // Redireciona conforme tipo
+            switch (usuario.tipo) {
+              case "Cliente":
+                navigation.replace("Cliente");
+                break;
+              case "Prestador":
+                navigation.replace("Prestador");
+                break;
+              case "Admin":
+                navigation.replace("Admin");
+                break;
+              default:
+                navigation.replace("Login");
             }
-          } else {
-            Alert.alert("Erro", "Senha incorreta!");
           }
-        } else {
-          Alert.alert("Erro", "Usuário não encontrado!");
+        });
+
+        if (!logado) {
+          Alert.alert("Erro", "Email ou senha incorretos!");
         }
-      })
-      .catch((error) => {
-        Alert.alert("Erro", "Erro ao fazer login: " + error.message);
-      });
+      } else {
+        Alert.alert("Erro", "Nenhum usuário encontrado!");
+      }
+    }).catch((error) => {
+      Alert.alert("Erro", "Não foi possível logar: " + error.message);
+    });
+  };
+
+  // Botão de sair (pode ser usado nas telas Cliente, Prestador e Admin)
+  const handleSair = () => {
+    setEmail("");
+    setSenha("");
+    navigation.replace("Login");
   };
 
   return (
@@ -53,69 +67,36 @@ export default function LoginScreen({ navigation }) {
       <TextInput
         style={styles.input}
         placeholder="E-mail"
-        placeholderTextColor="#aaa"
         value={email}
         onChangeText={setEmail}
+        keyboardType="email-address"
+        autoCapitalize="none"
       />
-
       <TextInput
         style={styles.input}
         placeholder="Senha"
-        placeholderTextColor="#aaa"
-        secureTextEntry
         value={senha}
         onChangeText={setSenha}
+        secureTextEntry
       />
 
-      <TouchableOpacity style={styles.botao} onPress={handleLogin}>
+      <TouchableOpacity style={styles.botaoLogin} onPress={handleLogin}>
         <Text style={styles.textoBotao}>Entrar</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => navigation.navigate("Cadastro")}>
-        <Text style={styles.link}>Não tem conta? Cadastre-se</Text>
+      <TouchableOpacity onPress={() => navigation.navigate("Cadastro")} style={styles.botaoCadastro}>
+        <Text style={styles.textoBotaoCadastro}>Ainda não tem conta? Cadastrar</Text>
       </TouchableOpacity>
     </View>
   );
 }
 
-// 🎨 Estilo da tela
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#121212",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 20,
-  },
-  titulo: {
-    color: "#fff",
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 30,
-  },
-  input: {
-    width: "100%",
-    backgroundColor: "#1e1e1e",
-    color: "#fff",
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 15,
-  },
-  botao: {
-    backgroundColor: "#ff4b4b",
-    width: "100%",
-    padding: 12,
-    borderRadius: 8,
-    alignItems: "center",
-    marginTop: 10,
-  },
-  textoBotao: {
-    color: "#fff",
-    fontWeight: "bold",
-  },
-  link: {
-    color: "#bbb",
-    marginTop: 20,
-    textDecorationLine: "underline",
-  },
+  container: { flex: 1, justifyContent: "center", paddingHorizontal: 20, backgroundColor: "#fff" },
+  titulo: { fontSize: 28, fontWeight: "bold", marginBottom: 30, alignSelf: "center" },
+  input: { height: 50, borderColor: "#ccc", borderWidth: 1, borderRadius: 8, marginBottom: 15, paddingHorizontal: 15, fontSize: 16 },
+  botaoLogin: { backgroundColor: "#ff4d4d", padding: 15, borderRadius: 8, alignItems: "center", marginBottom: 15 },
+  textoBotao: { color: "#fff", fontSize: 16, fontWeight: "bold" },
+  botaoCadastro: { alignItems: "center" },
+  textoBotaoCadastro: { color: "#ff4d4d", fontSize: 14 },
 });
