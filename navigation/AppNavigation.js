@@ -1,7 +1,7 @@
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { NavigationContainer } from "@react-navigation/native";
-
+import CadastroPrestadorScreen from "./screens/CadastroPrestadorScreen";
 import LoginScreen from "../screens/LoginScreen";
 import AdminScreen from "../screens/AdminScreen";
 import ClientesScreen from "../screens/ClientesScreen";
@@ -19,6 +19,12 @@ export default function AppNavigation() {
         <Stack.Screen name="ClientesScreen" component={ClientesScreen} />
         <Stack.Screen name="PrestadoresScreen" component={PrestadoresScreen} />
         <Stack.Screen name="ChamadosScreen" component={ChamadosScreen} />
+        <Stack.Screen
+  name="CadastroPrestador"
+  component={CadastroPrestadorScreen}
+  options={{ title: "Cadastrar Prestador" }}
+/>
+
       </Stack.Navigator>
     </NavigationContainer>
   );

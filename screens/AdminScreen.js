@@ -7,10 +7,10 @@ import {
   StyleSheet,
   ScrollView,
   SafeAreaView,
-  Alert
+  Alert,
 } from "react-native";
 import { ref, get, child } from "firebase/database";
-import { db } from "./firebase";
+import { db } from "../firebase"; // <-- ajuste o caminho se necessário
 
 const PRIMARY_COLOR = "#f1069bff";
 const BACKGROUND_COLOR = "#f5f5f5";
@@ -29,26 +29,35 @@ export default function AdminScreen({ navigation }) {
       try {
         const dbRef = ref(db);
 
-        // Usuários
+        // === USUÁRIOS ===
         const snapshotUsuarios = await get(child(dbRef, "usuarios"));
         if (snapshotUsuarios.exists()) {
           const allUsuariosObj = snapshotUsuarios.val();
           const allUsuarios = Object.keys(allUsuariosObj).map(key => ({
             id: key,
-            ...allUsuariosObj[key]
+            ...allUsuariosObj[key],
           }));
-
-          setClientes(allUsuarios.filter(u => u.tipo === "Cliente"));
-          setPrestadores(allUsuarios.filter(u => u.tipo === "Prestador"));
+          setClientes(allUsuarios);
         }
 
-        // Chamados
+        // === PRESTADORES ===
+        const snapshotPrestadores = await get(child(dbRef, "prestadores"));
+        if (snapshotPrestadores.exists()) {
+          const prestadoresObj = snapshotPrestadores.val();
+          const allPrestadores = Object.keys(prestadoresObj).map(key => ({
+            id: key,
+            ...prestadoresObj[key],
+          }));
+          setPrestadores(allPrestadores);
+        }
+
+        // === CHAMADOS ===
         const snapshotChamados = await get(child(dbRef, "chamados"));
         if (snapshotChamados.exists()) {
           const chamadosObj = snapshotChamados.val();
           const allChamados = Object.keys(chamadosObj).map(key => ({
             id: key,
-            ...chamadosObj[key]
+            ...chamadosObj[key],
           }));
 
           setChamados(allChamados);
@@ -116,7 +125,18 @@ export default function AdminScreen({ navigation }) {
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity style={[styles.button, { backgroundColor: PRIMARY_COLOR }]} onPress={handleLogout}>
+        {/* === BOTÃO NOVO: CADASTRAR PRESTADOR === */}
+        <TouchableOpacity
+          style={[styles.button, { backgroundColor: "#27AE60" }]}
+          onPress={() => navigation.navigate("CadastroPrestador")}
+        >
+          <Text style={styles.buttonText}>Cadastrar Prestador</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.button, { backgroundColor: PRIMARY_COLOR }]}
+          onPress={handleLogout}
+        >
           <Text style={styles.buttonText}>Logout</Text>
         </TouchableOpacity>
       </ScrollView>
@@ -139,7 +159,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
-    alignItems: "center"
+    alignItems: "center",
   },
   cardLabel: { fontSize: 16, color: "#555", marginBottom: 5 },
   cardValue: { fontSize: 22, fontWeight: "bold", color: "#000" },
@@ -148,7 +168,7 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 8,
     alignItems: "center",
-    width: "100%"
+    width: "100%",
   },
-  buttonText: { color: "#fff", fontSize: 16, fontWeight: "bold" }
+  buttonText: { color: "#fff", fontSize: 16, fontWeight: "bold" },
 });
