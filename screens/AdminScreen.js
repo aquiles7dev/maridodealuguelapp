@@ -1,55 +1,154 @@
+// AdminScreen.js
 import React, { useEffect, useState } from "react";
-import { View, Text, FlatList, StyleSheet, TouchableOpacity } from "react-native";
-import { ref, onValue } from "firebase/database";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+  SafeAreaView,
+  Alert
+} from "react-native";
+import { ref, get, child } from "firebase/database";
 import { db } from "./firebase";
 
+const PRIMARY_COLOR = "#f1069bff";
+const BACKGROUND_COLOR = "#f5f5f5";
+
 export default function AdminScreen({ navigation }) {
+  const [clientes, setClientes] = useState([]);
+  const [prestadores, setPrestadores] = useState([]);
   const [chamados, setChamados] = useState([]);
 
+  const [ativos, setAtivos] = useState(0);
+  const [pendentes, setPendentes] = useState(0);
+  const [concluidos, setConcluidos] = useState(0);
+
   useEffect(() => {
-    const chamadosRef = ref(db, "chamados/");
-    onValue(chamadosRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        const lista = Object.keys(data).map((id) => ({
-          id,
-          ...data[id],
-        }));
-        setChamados(lista);
-      } else {
-        setChamados([]);
+    const fetchData = async () => {
+      try {
+        const dbRef = ref(db);
+
+        // Usuários
+        const snapshotUsuarios = await get(child(dbRef, "usuarios"));
+        if (snapshotUsuarios.exists()) {
+          const allUsuariosObj = snapshotUsuarios.val();
+          const allUsuarios = Object.keys(allUsuariosObj).map(key => ({
+            id: key,
+            ...allUsuariosObj[key]
+          }));
+
+          setClientes(allUsuarios.filter(u => u.tipo === "Cliente"));
+          setPrestadores(allUsuarios.filter(u => u.tipo === "Prestador"));
+        }
+
+        // Chamados
+        const snapshotChamados = await get(child(dbRef, "chamados"));
+        if (snapshotChamados.exists()) {
+          const chamadosObj = snapshotChamados.val();
+          const allChamados = Object.keys(chamadosObj).map(key => ({
+            id: key,
+            ...chamadosObj[key]
+          }));
+
+          setChamados(allChamados);
+          setAtivos(allChamados.filter(c => c.status === "Ativo").length);
+          setPendentes(allChamados.filter(c => c.status === "Pendente").length);
+          setConcluidos(allChamados.filter(c => c.status === "Concluído").length);
+        }
+      } catch (error) {
+        console.error(error);
+        Alert.alert("Erro", "Não foi possível carregar os dados do Firebase.");
       }
-    });
+    };
+
+    fetchData();
   }, []);
 
+  const handleLogout = () => {
+    navigation.replace("Login");
+  };
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.titulo}>Painel do Administrador</Text>
+    <SafeAreaView style={[styles.container, { backgroundColor: BACKGROUND_COLOR }]}>
+      <ScrollView contentContainerStyle={styles.scroll}>
+        <Text style={[styles.title, { color: PRIMARY_COLOR }]}>Painel do Admin</Text>
 
-      <FlatList
-        data={chamados}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={styles.item}>
-            <Text style={styles.texto}>{item.descricao}</Text>
-            <Text style={styles.status}>Status: {item.status}</Text>
-          </View>
-        )}
-      />
+        <View style={styles.cardsContainer}>
+          <TouchableOpacity
+            style={styles.card}
+            onPress={() => navigation.navigate("ClientesScreen", { clientes })}
+          >
+            <Text style={styles.cardLabel}>Clientes</Text>
+            <Text style={styles.cardValue}>{clientes.length}</Text>
+          </TouchableOpacity>
 
-      <TouchableOpacity style={styles.botaoSair} onPress={() => navigation.replace("Login")}>
-        <Text style={styles.textoSair}>Sair</Text>
-      </TouchableOpacity>
-    </View>
+          <TouchableOpacity
+            style={styles.card}
+            onPress={() => navigation.navigate("PrestadoresScreen", { prestadores })}
+          >
+            <Text style={styles.cardLabel}>Prestadores</Text>
+            <Text style={styles.cardValue}>{prestadores.length}</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.card}
+            onPress={() => navigation.navigate("ChamadosScreen", { chamados, status: "Ativo" })}
+          >
+            <Text style={styles.cardLabel}>Chamados Ativos</Text>
+            <Text style={styles.cardValue}>{ativos}</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.card}
+            onPress={() => navigation.navigate("ChamadosScreen", { chamados, status: "Pendente" })}
+          >
+            <Text style={styles.cardLabel}>Chamados em andamento</Text>
+            <Text style={styles.cardValue}>{pendentes}</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.card}
+            onPress={() => navigation.navigate("ChamadosScreen", { chamados, status: "Concluído" })}
+          >
+            <Text style={styles.cardLabel}>Chamados Concluídos</Text>
+            <Text style={styles.cardValue}>{concluidos}</Text>
+          </TouchableOpacity>
+        </View>
+
+        <TouchableOpacity style={[styles.button, { backgroundColor: PRIMARY_COLOR }]} onPress={handleLogout}>
+          <Text style={styles.buttonText}>Logout</Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#121212", padding: 20 },
-  titulo: { color: "#fff", fontSize: 24, fontWeight: "bold", marginBottom: 20 },
-  item: { backgroundColor: "#1e1e1e", padding: 10, borderRadius: 8, marginBottom: 10 },
-  texto: { color: "#fff" },
-  status: { color: "#bbb", fontSize: 12 },
-  botaoSair: { backgroundColor: "#444", padding: 10, borderRadius: 8, alignItems: "center", marginTop: 15 },
-  textoSair: { color: "#fff" },
+  container: { flex: 1 },
+  scroll: { padding: 20, alignItems: "center" },
+  title: { fontSize: 26, fontWeight: "bold", marginBottom: 20 },
+  cardsContainer: { width: "100%" },
+  card: {
+    backgroundColor: "#fff",
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 15,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    alignItems: "center"
+  },
+  cardLabel: { fontSize: 16, color: "#555", marginBottom: 5 },
+  cardValue: { fontSize: 22, fontWeight: "bold", color: "#000" },
+  button: {
+    marginTop: 20,
+    padding: 15,
+    borderRadius: 8,
+    alignItems: "center",
+    width: "100%"
+  },
+  buttonText: { color: "#fff", fontSize: 16, fontWeight: "bold" }
 });

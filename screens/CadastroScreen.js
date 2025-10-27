@@ -37,8 +37,8 @@ export default function CadastroScreen({ navigation }) {
           case 'Cliente':
             navigation.replace('Cliente');
             break;
-          case 'Prestador':
-            navigation.replace('Prestador');
+          case 'Prestadores':
+            navigation.replace('Prestadores');
             break;
           default:
             navigation.replace('Login');
@@ -77,10 +77,10 @@ export default function CadastroScreen({ navigation }) {
           <Text style={styles.tipoTexto}>Cliente</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          onPress={() => setTipo('Prestador')}
-          style={[styles.tipoButton, tipo === 'Prestador' && styles.tipoSelecionado]}
+          onPress={() => setTipo('Prestadores')}
+          style={[styles.tipoButton, tipo === 'Prestadores' && styles.tipoSelecionado]}
         >
-          <Text style={styles.tipoTexto}>Prestador</Text>
+          <Text style={styles.tipoTexto}>Prestadores</Text>
         </TouchableOpacity>
       </View>
 

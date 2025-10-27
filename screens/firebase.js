@@ -1,6 +1,6 @@
 // firebase.js
 import { initializeApp } from "firebase/app";
-import { getDatabase } from "firebase/database";
+import { getDatabase, ref, get, set, child, push } from "firebase/database";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAkNoxO_71LrdQlf0TGp6WeYvkDyLXCEtg",
@@ -14,3 +14,30 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 export const db = getDatabase(app);
+
+// Gera ID sequencial para cada tipo
+export async function gerarId(tipo) {
+  const dbRef = ref(db, tipo);
+  const snapshot = await get(dbRef);
+  let count = 1;
+
+  if (snapshot.exists()) {
+    const items = snapshot.val();
+    count = Object.keys(items).length + 1;
+  }
+
+  let prefix = "";
+  if (tipo === "clientes") prefix = "CL";
+  if (tipo === "prestadores") prefix = "PR";
+  if (tipo === "chamados") prefix = "CH";
+
+  return `${prefix}${count}`;
+}
+
+// Salvar novo item com ID sequencial
+export async function salvarItem(tipo, data) {
+  const id = await gerarId(tipo);
+  const dbRef = ref(db, `${tipo}/${id}`);
+  await set(dbRef, data);
+  return id;
+}

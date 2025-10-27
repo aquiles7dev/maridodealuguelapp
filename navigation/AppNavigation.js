@@ -1,23 +1,20 @@
 import React from "react";
-import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { NavigationContainer } from "@react-navigation/native";
 
-// Telas
-import LoginScreen from "./screens/LoginScreen";
-import CadastroScreen from "./screens/CadastroScreen";
-import AdminScreen from "./screens/AdminScreen";
-import ClientesScreen from "./screens/ClientesScreen";
-import PrestadoresScreen from "./screens/PrestadoresScreen";
-import ChamadosScreen from "./screens/ChamadosScreen";
+import LoginScreen from "../screens/LoginScreen";
+import AdminScreen from "../screens/AdminScreen";
+import ClientesScreen from "../screens/ClientesScreen";
+import PrestadoresScreen from "../screens/PrestadoresScreen";
+import ChamadosScreen from "../screens/ChamadosScreen";
 
 const Stack = createNativeStackNavigator();
 
-export default function App() {
+export default function AppNavigation() {
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Login" screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Login" component={LoginScreen} />
-        <Stack.Screen name="Cadastro" component={CadastroScreen} />
         <Stack.Screen name="Admin" component={AdminScreen} />
         <Stack.Screen name="ClientesScreen" component={ClientesScreen} />
         <Stack.Screen name="PrestadoresScreen" component={PrestadoresScreen} />
