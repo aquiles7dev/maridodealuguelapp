@@ -10,7 +10,7 @@ import {
   Alert,
 } from "react-native";
 import { ref, get, child } from "firebase/database";
-import { db } from "../firebase"; // <-- ajuste o caminho se necessário
+import { db } from "./firebase"; // <-- ajuste o caminho se necessário
 
 const PRIMARY_COLOR = "#f1069bff";
 const BACKGROUND_COLOR = "#f5f5f5";

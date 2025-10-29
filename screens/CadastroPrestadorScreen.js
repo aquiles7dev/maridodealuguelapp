@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView } from "react-native";
-import { createPrestadorByAdmin } from "../firebase"; // importa função nova
+import { createPrestadorByAdmin } from "./firebase"; // importa função nova
 
 export default function CadastroPrestadorScreen({ navigation }) {
   // estados locais do formulário

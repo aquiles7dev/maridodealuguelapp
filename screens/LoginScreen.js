@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from "react-native";
 import { ref, get, child } from "firebase/database";
-import { db } from "../screens/firebase"; // ajuste o caminho se necessário
+import { db } from "../screens/firebase";
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState("");
@@ -13,7 +13,7 @@ export default function LoginScreen({ navigation }) {
       return;
     }
 
-    // 🔐 Admin fixo direto no código
+    // 🔐 Admin fixo
     if (email === "admin" && senha === "1234") {
       Alert.alert("Bem-vindo", "Login de administrador realizado!");
       navigation.replace("Admin");
@@ -32,14 +32,18 @@ export default function LoginScreen({ navigation }) {
 
         if (encontrado) {
           Alert.alert("Sucesso", "Login realizado com sucesso!");
-          switch (encontrado.tipo) {
-            case "Cliente":
-              navigation.replace("Cliente");
+
+          // Garantir que o tipo seja minúsculo
+          const tipoUsuario = encontrado.tipo.toLowerCase();
+
+          switch (tipoUsuario) {
+            case "cliente":
+              navigation.replace("ClientesScreen"); // <== nome do Stack.Screen
               break;
-            case "Prestador":
-              navigation.replace("Prestadores");
+            case "prestador":
+              navigation.replace("PrestadoresScreen"); // <== nome do Stack.Screen
               break;
-            case "Admin":
+            case "admin":
               navigation.replace("Admin");
               break;
             default:
@@ -82,7 +86,6 @@ export default function LoginScreen({ navigation }) {
         <Text style={styles.buttonText}>Entrar</Text>
       </TouchableOpacity>
 
-      {/* Botão de cadastro */}
       <TouchableOpacity
         style={[styles.button, { backgroundColor: "#28a745", marginTop: 10 }]}
         onPress={() => navigation.navigate("Cadastro")}

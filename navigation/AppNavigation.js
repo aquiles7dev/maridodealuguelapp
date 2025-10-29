@@ -2,11 +2,11 @@ import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { NavigationContainer } from "@react-navigation/native";
 import CadastroPrestadorScreen from "./screens/CadastroPrestadorScreen";
-import LoginScreen from "../screens/LoginScreen";
-import AdminScreen from "../screens/AdminScreen";
-import ClientesScreen from "../screens/ClientesScreen";
-import PrestadoresScreen from "../screens/PrestadoresScreen";
-import ChamadosScreen from "../screens/ChamadosScreen";
+import LoginScreen from "./screens/LoginScreen";
+import AdminScreen from "./screens/AdminScreen";
+import ClientesScreen from "./screens/ClientesScreen";
+import PrestadoresScreen from "./screens/PrestadoresScreen";
+import ChamadosScreen from "./screens/ChamadosScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -20,11 +20,10 @@ export default function AppNavigation() {
         <Stack.Screen name="PrestadoresScreen" component={PrestadoresScreen} />
         <Stack.Screen name="ChamadosScreen" component={ChamadosScreen} />
         <Stack.Screen
-  name="CadastroPrestador"
-  component={CadastroPrestadorScreen}
-  options={{ title: "Cadastrar Prestador" }}
-/>
-
+          name="CadastroPrestador"
+          component={CadastroPrestadorScreen}
+          options={{ title: "Cadastrar Prestador" }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
